@@ -1,0 +1,75 @@
+$ set -e
+getent group suivi || groupadd -g 5003 suivi
+id lea >/dev/null 2>&1 || useradd -u 5104 -g suivi -c 'Lea Fabre - responsable suivi des tournees' -m lea
+printf '%s\n' 'lea:Helios-Suivi-2026' | chpasswd
+chage -M 90 -m 1 -W 14 -I 7 lea
+id helios-suivi >/dev/null 2>&1 || useradd -r -g suivi -d /srv/helios/suivi -s /sbin/nologin -M helios-suivi
+install -d -o root -g suivi -m 2750 /srv/helios/suivi
+install -d -o root -g suivi -m 2770 /srv/helios/suivi/www
+setfacl -m u:zabbix:--x /srv/helios/suivi
+setfacl -m u:helios-suivi:rwx,u:zabbix:--x,m::rwx,o::--- /srv/helios/suivi/www
+setfacl -d -m u::rwx,u:helios-suivi:rwx,g::rwx,m::rwx,o::--- /srv/helios/suivi/www
+setfacl -m u:helios-suivi:--x /var/lib/helios
+setfacl -m u:helios-suivi:r-- /var/lib/helios/telemetry.csv
+su - lea -c 'umask 077; printf "<!doctype html><html lang=fr><meta charset=utf-8><title>Suivi Helios</title><h1>Suivi des tournees Helios</h1><p>Portail exploite par Lea Fabre.</p><p><a href=etat.json>Etat du collecteur</a></p></html>\n" > /srv/helios/suivi/www/index.html'
+install -d -o helios -g helios -m 0750 /srv/helios/archives
+install -d -o root -g root -m 0700 /srv/helios/archives/suivi
+id lea; getent passwd lea helios-suivi; chage -l lea
+getfacl /srv/helios/suivi/www /srv/helios/suivi/www/index.html /var/lib/helios /var/lib/helios/telemetry.csv
+
+
+2026-11-06T10:31:31+01:00
+uid=5104(lea) gid=5003(suivi) groups=5003(suivi)
+lea:x:5104:5003:Lea Fabre - responsable suivi des tournees:/home/lea:/bin/bash
+helios-suivi:x:992:5003::/srv/helios/suivi:/sbin/nologin
+Last password change					: Nov 06, 2026
+Password expires					: Feb 04, 2027
+Password inactive					: Feb 11, 2027
+Account expires						: never
+Minimum number of days between password change		: 1
+Maximum number of days between password change		: 90
+Number of days of warning before password expires	: 14
+# file: srv/helios/suivi/www
+# owner: root
+# group: suivi
+# flags: -s-
+user::rwx
+user:helios-suivi:rwx
+user:zabbix:--x
+group::rwx
+mask::rwx
+other::---
+default:user::rwx
+default:user:helios-suivi:rwx
+default:group::rwx
+default:mask::rwx
+default:other::---
+
+# file: srv/helios/suivi/www/index.html
+# owner: lea
+# group: suivi
+user::rw-
+user:helios-suivi:rwx	#effective:rw-
+group::rwx	#effective:rw-
+mask::rw-
+other::---
+
+# file: var/lib/helios
+# owner: helios
+# group: helios
+user::rwx
+user:helios-suivi:--x
+group::---
+mask::--x
+other::---
+
+# file: var/lib/helios/telemetry.csv
+# owner: helios
+# group: helios
+user::rw-
+user:helios-suivi:r--
+group::r--
+mask::r--
+other::r--
+
+getfacl: Removing leading '/' from absolute path names

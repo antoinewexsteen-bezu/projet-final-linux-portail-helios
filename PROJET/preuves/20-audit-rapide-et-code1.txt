@@ -1,0 +1,36 @@
+$ set -e
+systemctl daemon-reload
+systemctl start helios-suivi-publish.service
+printf 'telemetrie-invalide\n' > /run/projet-invalid.csv
+chown root:suivi /run/projet-invalid.csv
+chmod 0640 /run/projet-invalid.csv
+before=$(sha256sum /srv/helios/suivi/www/etat.json)
+set +e
+unshare --mount bash -c 'mount --make-rprivate /; mount --bind /run/projet-invalid.csv /var/lib/helios/telemetry.csv; runuser -u helios-suivi -- /usr/local/sbin/helios-suivi-publish.sh'
+rc=$?
+set -e
+echo "telemetrie invalide dans espace de montage isole rc=$rc"
+test "$rc" -eq 1
+test "$before" = "$(sha256sum /srv/helios/suivi/www/etat.json)"; echo 'JSON precedent conserve'
+find /srv/helios/suivi/www -maxdepth 1 -name '.etat.*' -print
+rm /run/projet-invalid.csv
+/usr/local/sbin/helios-suivi-audit.sh; echo "audit rc=$?"
+
+
+2026-11-06T10:42:54+01:00
+telemetrie invalide dans espace de montage isole rc=1
+JSON precedent conserve
+[OK] E1
+[OK] E2
+[OK] E3
+[OK] E4
+[OK] E5
+[OK] E6
+[OK] E7
+[OK] E8
+[OK] E9
+Bilan : 9/9
+audit rc=0
+Traceback (most recent call last):
+  File "<stdin>", line 5, in <module>
+ValueError: telemetrie vide ou ligne invalide

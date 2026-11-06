@@ -1,0 +1,119 @@
+$ set -e
+audit=/usr/local/sbin/helios-suivi-audit.sh
+systemctl stop helios-suivi-publish.timer helios-suivi-backup.timer
+repair() {
+ rm -f /etc/sudoers.d/93-projet-test
+ firewall-cmd --zone=internal --add-port=8080/tcp >/dev/null
+ systemctl start helios-suivi.service helios-suivi-publish.timer helios-suivi-backup.timer
+ /usr/local/sbin/helios-suivi-publish.sh
+}
+trap repair EXIT
+echo '=== PANNE portail arrete ==='
+systemctl stop helios-suivi.service
+set +e; "$audit"; rc=$?; set -e; echo "audit rc=$rc"; test "$rc" -ne 0
+systemctl start helios-suivi.service
+echo '=== PANNE port runtime retire ==='
+firewall-cmd --zone=internal --remove-port=8080/tcp
+set +e; "$audit"; rc=$?; set -e; echo "audit rc=$rc"; test "$rc" -ne 0
+firewall-cmd --zone=internal --add-port=8080/tcp
+echo '=== PANNE etat vieux ==='
+touch -d '10 minutes ago' /srv/helios/suivi/www/etat.json
+set +e; "$audit"; rc=$?; set -e; echo "audit rc=$rc"; test "$rc" -ne 0
+/usr/local/sbin/helios-suivi-publish.sh
+echo '=== PANNE delegation sudo trop large ==='
+printf '%%suivi ALL=(root) /usr/bin/systemctl restart sshd\n' > /etc/sudoers.d/93-projet-test
+chmod 0440 /etc/sudoers.d/93-projet-test
+visudo -cf /etc/sudoers.d/93-projet-test
+set +e; "$audit"; rc=$?; set -e; echo "audit rc=$rc"; test "$rc" -ne 0
+rm /etc/sudoers.d/93-projet-test
+echo '=== PANNE empreinte sauvegarde invalide ==='
+cd /srv/helios/archives/suivi
+latest=$(ls -1 suivi-*.tar.gz | sort | tail -1)
+cp "$latest.sha256" /root/projet-baseline/checksum-test.save
+printf '%064d  %s\n' 0 "$latest" > "$latest.sha256"
+set +e; "$audit"; rc=$?; set -e; echo "audit rc=$rc"
+cp /root/projet-baseline/checksum-test.save "$latest.sha256"
+test "$rc" -ne 0
+repair
+trap - EXIT
+echo '=== APRES REPARATION ==='
+"$audit"; echo "audit rc=$?"
+
+
+2026-11-06T10:38:03+01:00
+=== PANNE portail arrete ===
+[OK] E1
+[OK] E2
+[OK] E3
+[KO] E4 : systemctl is-active helios-suivi.service: inactive
+[OK] E5
+[OK] E6
+[OK] E7
+[KO] E8 : sonde HTTP
+[KO] E9 : systemctl is-active helios-suivi-backup.timer: inactive
+Bilan : 6/9
+audit rc=1
+=== PANNE port runtime retire ===
+success
+[OK] E1
+[OK] E2
+[OK] E3
+[KO] E4 : systemctl is-active helios-suivi-publish.timer: inactive
+[OK] E5
+[KO] E6 : 8080 incorrect dans internal
+[OK] E7
+[OK] E8
+[KO] E9 : systemctl is-active helios-suivi-backup.timer: inactive
+Bilan : 6/9
+audit rc=1
+success
+=== PANNE etat vieux ===
+[OK] E1
+[OK] E2
+[KO] E3 : etat.json trop ancien/futur
+[KO] E4 : systemctl is-active helios-suivi-publish.timer: inactive
+[OK] E5
+[OK] E6
+[OK] E7
+[KO] E8 : sonde age >= 300 ou futur
+[KO] E9 : systemctl is-active helios-suivi-backup.timer: inactive
+Bilan : 5/9
+audit rc=1
+=== PANNE delegation sudo trop large ===
+/etc/sudoers.d/93-projet-test: parsed OK
+[OK] E1
+[OK] E2
+[OK] E3
+[KO] E4 : systemctl is-active helios-suivi-publish.timer: inactive
+[KO] E5 : sudo autorise /usr/bin/systemctl restart sshd
+[OK] E6
+[OK] E7
+[OK] E8
+[KO] E9 : systemctl is-active helios-suivi-backup.timer: inactive
+Bilan : 6/9
+audit rc=1
+=== PANNE empreinte sauvegarde invalide ===
+[OK] E1
+[OK] E2
+[OK] E3
+[KO] E4 : systemctl is-active helios-suivi-publish.timer: inactive
+[OK] E5
+[OK] E6
+[OK] E7
+[OK] E8
+[KO] E9 : empreinte sauvegarde invalide/absente
+Bilan : 7/9
+audit rc=1
+=== APRES REPARATION ===
+[OK] E1
+[OK] E2
+[OK] E3
+[OK] E4
+[OK] E5
+[OK] E6
+[OK] E7
+[OK] E8
+[OK] E9
+Bilan : 9/9
+audit rc=0
+Warning: ALREADY_ENABLED: '8080:tcp' already in 'internal'

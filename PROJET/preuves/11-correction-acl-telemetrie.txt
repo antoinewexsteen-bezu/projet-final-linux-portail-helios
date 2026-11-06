@@ -1,0 +1,38 @@
+$ set -e
+cp -a /usr/local/sbin/helios-watch-auth.sh /root/projet-baseline/helios-watch-auth.sh.orig
+python3 - <<'PY'
+p='/usr/local/sbin/helios-watch-auth.sh'
+s=open(p).read()
+old='install -d -m 0700 /var/lib/helios'
+assert old in s
+s=s.replace(old,'[[ -d /var/lib/helios ]] || install -d -m 0700 /var/lib/helios',1)
+open(p,'w').write(s)
+PY
+bash -n /usr/local/sbin/helios-watch-auth.sh
+setfacl -m u:helios-suivi:--x /var/lib/helios
+systemctl start helios-watch-auth.service
+getfacl /var/lib/helios
+runuser -u helios-suivi -- test -r /var/lib/helios/telemetry.csv; echo "lecture apres watch-auth rc=$?"
+systemctl start helios-suivi-publish.service
+sha256sum -c /root/projet-baseline/units.sha256
+
+
+2026-11-06T10:35:46+01:00
+# file: var/lib/helios
+# owner: helios
+# group: helios
+user::rwx
+user:helios-suivi:--x
+group::---
+mask::--x
+other::---
+
+lecture apres watch-auth rc=0
+/etc/systemd/system/helios-collect.service: OK
+/etc/systemd/system/helios-archive.service: OK
+/etc/systemd/system/helios-archive.timer: OK
+/etc/systemd/system/helios-inbox.path: OK
+/etc/systemd/system/helios.target: OK
+/etc/systemd/system/helios-watch-auth.service: OK
+/etc/systemd/system/helios-watch-auth.timer: OK
+getfacl: Removing leading '/' from absolute path names

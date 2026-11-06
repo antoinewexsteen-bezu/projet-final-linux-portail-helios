@@ -1,0 +1,33 @@
+$ set -e
+systemctl start helios-suivi-backup.service
+cd /srv/helios/archives/suivi
+archive=$(ls -1 suivi-*.tar.gz | sort | tail -1)
+sha256sum -c "$archive.sha256"
+tar -tzf "$archive"
+start=$(date +%s)
+testdir=$(mktemp -d /root/restauration-suivi.XXXXXXXX)
+tar --acls --xattrs --selinux --numeric-owner -xzf "$archive" -C "$testdir"
+getfacl -cp /srv/helios/suivi/www > "$testdir/prod.acl"
+getfacl -cp "$testdir/srv/helios/suivi/www" > "$testdir/restaure.acl"
+diff -u "$testdir/prod.acl" "$testdir/restaure.acl"; echo "ACL www identiques rc=$?"
+getfacl -cp /srv/helios/suivi/www/index.html > "$testdir/index.acl"
+sha256sum /srv/helios/suivi/www/index.html > "$testdir/index.sha256"
+systemctl stop helios-suivi-publish.timer
+trap 'systemctl start helios-suivi-publish.timer' EXIT
+find /srv/helios/suivi/www -maxdepth 1 -type f ! -name index.html -exec sha256sum {} + > "$testdir/autres.sha256"
+rm /srv/helios/suivi/www/index.html
+curl -s -o /dev/null -w 'index absent HTTP=%{http_code}\n' http://127.0.0.1:8080/index.html
+tar --acls --xattrs --selinux --numeric-owner -xzf "$archive" -C / srv/helios/suivi/www/index.html
+getfacl -cp /srv/helios/suivi/www/index.html > "$testdir/index-restaure.acl"
+diff -u "$testdir/index.acl" "$testdir/index-restaure.acl"; echo "ACL index identiques rc=$?"
+sha256sum -c "$testdir/index.sha256" "$testdir/autres.sha256"
+ls -l /srv/helios/suivi/www/index.html
+curl -s -o /dev/null -w 'index restaure HTTP=%{http_code}\n' http://127.0.0.1:8080/index.html
+echo "Duree restauration et controles : $(( $(date +%s) - start )) secondes"
+systemctl start helios-suivi-publish.timer
+trap - EXIT
+
+
+2026-11-06T10:37:13+01:00
+Job for helios-suivi-backup.service failed because the control process exited with error code.
+See "systemctl status helios-suivi-backup.service" and "journalctl -xeu helios-suivi-backup.service" for details.

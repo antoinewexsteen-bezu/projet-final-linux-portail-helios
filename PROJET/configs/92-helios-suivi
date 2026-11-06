@@ -1,0 +1,2 @@
+# Commandes exactes, aucun joker, authentification obligatoire, aucun pager.
+%suivi ALL=(root) /usr/bin/systemctl restart helios-suivi.service, /usr/bin/systemctl --no-pager status helios-suivi.service, /usr/bin/systemctl start helios-suivi-publish.service, /usr/bin/journalctl --no-pager -n 100 -u helios-suivi.service, /usr/bin/journalctl --no-pager -n 100 -u helios-suivi-publish.service

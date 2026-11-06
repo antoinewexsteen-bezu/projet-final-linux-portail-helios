@@ -1,0 +1,25 @@
+$ set -e
+systemctl start helios-suivi-backup.service
+systemctl status --no-pager helios-suivi-backup.service || true
+journalctl -t helios-suivi-backup -n 6 --no-pager
+
+
+2026-11-06T10:41:45+01:00
+○ helios-suivi-backup.service - Sauvegarde du portail Helios avec ACL
+     Loaded: loaded (/etc/systemd/system/helios-suivi-backup.service; static)
+     Active: inactive (dead) since Fri 2026-11-06 10:41:46 CET; 32ms ago
+TriggeredBy: ● helios-suivi-backup.timer
+    Process: 10808 ExecStart=/usr/local/sbin/helios-suivi-backup.sh (code=exited, status=0/SUCCESS)
+   Main PID: 10808 (code=exited, status=0/SUCCESS)
+        CPU: 104ms
+
+Nov 06 10:41:46 srv-core systemd[1]: Starting Sauvegarde du portail Helios avec ACL...
+Nov 06 10:41:46 srv-core helios-suivi-backup[10828]: sauvegarde terminee : suivi-20261106-104146.tar.gz ; retention 7
+Nov 06 10:41:46 srv-core systemd[1]: helios-suivi-backup.service: Deactivated successfully.
+Nov 06 10:41:46 srv-core systemd[1]: Finished Sauvegarde du portail Helios avec ACL.
+Nov 06 10:37:18 srv-core helios-suivi-backup[4894]: sauvegarde terminee : suivi-20261106-103718.tar.gz ; retention 7
+Nov 06 10:37:19 srv-core helios-suivi-backup[4915]: sauvegarde terminee : suivi-20261106-103719.tar.gz ; retention 7
+Nov 06 10:37:20 srv-core helios-suivi-backup[4937]: sauvegarde terminee : suivi-20261106-103720.tar.gz ; retention 7
+Nov 06 10:37:22 srv-core helios-suivi-backup[4964]: sauvegarde terminee : suivi-20261106-103721.tar.gz ; retention 7
+Nov 06 10:38:02 srv-core helios-suivi-backup[9486]: sauvegarde terminee : suivi-20261106-103802.tar.gz ; retention 7
+Nov 06 10:41:46 srv-core helios-suivi-backup[10828]: sauvegarde terminee : suivi-20261106-104146.tar.gz ; retention 7

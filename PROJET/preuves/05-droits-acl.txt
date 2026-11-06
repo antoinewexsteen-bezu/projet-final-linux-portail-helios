@@ -1,0 +1,62 @@
+$ set -e
+ls -ld /srv/helios/suivi/www
+su - lea -c 'umask 077; echo "preuve ACL avec umask 077" > /srv/helios/suivi/www/preuve-acl.txt'
+ls -l /srv/helios/suivi/www/preuve-acl.txt
+getfacl /srv/helios/suivi/www/preuve-acl.txt
+runuser -u helios-suivi -- cat /srv/helios/suivi/www/preuve-acl.txt
+runuser -u helios-suivi -- test -w /srv/helios/suivi/www/preuve-acl.txt; echo "ecriture service rc=$?"
+set +e
+runuser -u nadia -- cat /srv/helios/suivi/www/preuve-acl.txt; echo "lecture nadia rc=$?"
+runuser -u zabbix -- ls /srv/helios/suivi/www; echo "liste zabbix rc=$?"
+runuser -u zabbix -- stat /srv/helios/suivi/www/etat.json; echo "stat zabbix rc=$?"
+set -e
+setfacl -x u:zabbix /srv/helios/suivi/www
+trap 'setfacl -m u:zabbix:--x /srv/helios/suivi/www' EXIT
+set +e
+runuser -u zabbix -- stat /srv/helios/suivi/www/etat.json; echo "sans ACL zabbix rc=$?"
+set -e
+setfacl -m u:zabbix:--x /srv/helios/suivi/www
+trap - EXIT
+runuser -u zabbix -- stat /srv/helios/suivi/www/etat.json
+
+
+2026-11-06T10:34:27+01:00
+drwxrws---+ 2 root suivi 41 Nov  6 10:31 /srv/helios/suivi/www
+-rw-rw----+ 1 lea suivi 26 Nov  6 10:34 /srv/helios/suivi/www/preuve-acl.txt
+# file: srv/helios/suivi/www/preuve-acl.txt
+# owner: lea
+# group: suivi
+user::rw-
+user:helios-suivi:rwx	#effective:rw-
+group::rwx	#effective:rw-
+mask::rw-
+other::---
+
+preuve ACL avec umask 077
+ecriture service rc=0
+lecture nadia rc=1
+liste zabbix rc=2
+  File: /srv/helios/suivi/www/etat.json
+  Size: 175       	Blocks: 8          IO Block: 4096   regular file
+Device: 804h/2052d	Inode: 17132874    Links: 1
+Access: (0660/-rw-rw----)  Uid: (  992/helios-suivi)   Gid: ( 5003/   suivi)
+Context: system_u:object_r:var_t:s0
+Access: 2026-11-06 10:31:36.775958170 +0100
+Modify: 2026-11-06 10:31:36.857958342 +0100
+Change: 2026-11-06 10:31:36.969958576 +0100
+ Birth: 2026-11-06 10:31:36.775958170 +0100
+stat zabbix rc=0
+sans ACL zabbix rc=1
+  File: /srv/helios/suivi/www/etat.json
+  Size: 175       	Blocks: 8          IO Block: 4096   regular file
+Device: 804h/2052d	Inode: 17132874    Links: 1
+Access: (0660/-rw-rw----)  Uid: (  992/helios-suivi)   Gid: ( 5003/   suivi)
+Context: system_u:object_r:var_t:s0
+Access: 2026-11-06 10:31:36.775958170 +0100
+Modify: 2026-11-06 10:31:36.857958342 +0100
+Change: 2026-11-06 10:31:36.969958576 +0100
+ Birth: 2026-11-06 10:31:36.775958170 +0100
+getfacl: Removing leading '/' from absolute path names
+cat: /srv/helios/suivi/www/preuve-acl.txt: Permission denied
+ls: cannot open directory '/srv/helios/suivi/www': Permission denied
+stat: cannot statx '/srv/helios/suivi/www/etat.json': Permission denied

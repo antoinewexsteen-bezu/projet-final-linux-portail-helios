@@ -1,0 +1,14 @@
+$ /usr/local/sbin/helios-suivi-audit.sh; echo "audit rc=$?"
+
+2026-11-06T10:33:33+01:00
+[OK] E1
+[OK] E2
+[KO] E3 : telemetrie illisible
+[OK] E4
+[OK] E5
+[KO] E6 : firewall-cmd --permanent --get-default-zone: usage: 'firewall-cmd --help' for usage information or see firewall-cmd(1) man page Can't use stand-alone options with other options.
+[OK] E7
+[OK] E8
+[OK] E9
+Bilan : 7/9
+audit rc=1

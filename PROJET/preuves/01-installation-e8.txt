@@ -1,0 +1,111 @@
+$ set -e
+if test -f /etc/yum.repos.d/epel.repo; then
+ grep -q '^excludepkgs=zabbix' /etc/yum.repos.d/epel.repo || sed -i '/^\[epel\]/a excludepkgs=zabbix*' /etc/yum.repos.d/epel.repo
+else echo 'EPEL absent : aucun paquet Zabbix concurrent'; fi
+rpm -q zabbix-release || rpm -Uvh https://repo.zabbix.com/zabbix/7.0/rocky/9/x86_64/zabbix-release-latest-7.0.el9.noarch.rpm
+dnf -y install zabbix-agent2 zabbix-get sysstat
+systemctl enable --now zabbix-agent2 sysstat.service sysstat-collect.timer sysstat-summary.timer
+getent passwd zabbix
+rpm -q zabbix-agent2 zabbix-get sysstat
+
+
+2026-11-06T10:30:43+01:00
+EPEL absent : aucun paquet Zabbix concurrent
+package zabbix-release is not installed
+Retrieving https://repo.zabbix.com/zabbix/7.0/rocky/9/x86_64/zabbix-release-latest-7.0.el9.noarch.rpm
+Verifying...                          ########################################
+Preparing...                          ########################################
+Updating / installing...
+zabbix-release-7.0-5.el9              ########################################
+Rocky Linux 9 - BaseOS                           13 kB/s | 4.3 kB     00:00    
+Rocky Linux 9 - AppStream                        16 kB/s | 4.8 kB     00:00    
+Rocky Linux 9 - AppStream                       9.9 MB/s |  31 MB     00:03    
+Rocky Linux 9 - Extras                          6.3 kB/s | 3.1 kB     00:00    
+Zabbix Official Repository - x86_64             268 kB/s | 635 kB     00:02    
+Zabbix Official Repository (non-supported) - x8 813  B/s | 1.1 kB     00:01    
+Zabbix Official Repository (tools) - x86_64     1.7 kB/s | 2.4 kB     00:01    
+Dependencies resolved.
+================================================================================
+ Package              Arch        Version                  Repository      Size
+================================================================================
+Installing:
+ sysstat              x86_64      12.5.4-11.el9            appstream      463 k
+ zabbix-agent2        x86_64      7.0.32-release2.el9      zabbix         6.6 M
+ zabbix-get           x86_64      7.0.32-release2.el9      zabbix         437 k
+Installing dependencies:
+ avahi-libs           x86_64      0.8-23.el9               baseos          66 k
+ libuv                x86_64      1:1.42.0-2.el9_4         appstream      146 k
+ lm_sensors-libs      x86_64      3.6.0-10.el9             appstream       41 k
+ pcp-conf             x86_64      6.3.7-8.el9_8.4          appstream       30 k
+ pcp-libs             x86_64      6.3.7-8.el9_8.4          appstream      644 k
+
+Transaction Summary
+================================================================================
+Install  8 Packages
+
+Total download size: 8.4 M
+Installed size: 29 M
+Downloading Packages:
+(1/8): lm_sensors-libs-3.6.0-10.el9.x86_64.rpm  299 kB/s |  41 kB     00:00    
+(2/8): libuv-1.42.0-2.el9_4.x86_64.rpm          704 kB/s | 146 kB     00:00    
+(3/8): pcp-conf-6.3.7-8.el9_8.4.x86_64.rpm      395 kB/s |  30 kB     00:00    
+(4/8): avahi-libs-0.8-23.el9.x86_64.rpm         241 kB/s |  66 kB     00:00    
+(5/8): pcp-libs-6.3.7-8.el9_8.4.x86_64.rpm      5.1 MB/s | 644 kB     00:00    
+(6/8): sysstat-12.5.4-11.el9.x86_64.rpm         3.5 MB/s | 463 kB     00:00    
+(7/8): zabbix-get-7.0.32-release2.el9.x86_64.rp 295 kB/s | 437 kB     00:01    
+(8/8): zabbix-agent2-7.0.32-release2.el9.x86_64 2.7 MB/s | 6.6 MB     00:02    
+--------------------------------------------------------------------------------
+Total                                           2.7 MB/s | 8.4 MB     00:03     
+Zabbix Official Repository - x86_64             3.0 MB/s | 3.1 kB     00:00    
+Key imported successfully
+Running transaction check
+Transaction check succeeded.
+Running transaction test
+Transaction test succeeded.
+Running transaction
+  Preparing        :                                                        1/1 
+  Installing       : pcp-conf-6.3.7-8.el9_8.4.x86_64                        1/8 
+  Installing       : lm_sensors-libs-3.6.0-10.el9.x86_64                    2/8 
+  Installing       : libuv-1:1.42.0-2.el9_4.x86_64                          3/8 
+  Installing       : avahi-libs-0.8-23.el9.x86_64                           4/8 
+  Installing       : pcp-libs-6.3.7-8.el9_8.4.x86_64                        5/8 
+  Installing       : sysstat-12.5.4-11.el9.x86_64                           6/8 
+  Running scriptlet: sysstat-12.5.4-11.el9.x86_64                           6/8 
+Created symlink /etc/systemd/system/multi-user.target.wants/sysstat.service → /usr/lib/systemd/system/sysstat.service.
+Created symlink /etc/systemd/system/sysstat.service.wants/sysstat-collect.timer → /usr/lib/systemd/system/sysstat-collect.timer.
+Created symlink /etc/systemd/system/sysstat.service.wants/sysstat-summary.timer → /usr/lib/systemd/system/sysstat-summary.timer.
+
+  Installing       : zabbix-get-7.0.32-release2.el9.x86_64                  7/8 
+  Running scriptlet: zabbix-agent2-7.0.32-release2.el9.x86_64               8/8 
+  Installing       : zabbix-agent2-7.0.32-release2.el9.x86_64               8/8 
+  Running scriptlet: zabbix-agent2-7.0.32-release2.el9.x86_64               8/8 
+  Verifying        : avahi-libs-0.8-23.el9.x86_64                           1/8 
+  Verifying        : libuv-1:1.42.0-2.el9_4.x86_64                          2/8 
+  Verifying        : lm_sensors-libs-3.6.0-10.el9.x86_64                    3/8 
+  Verifying        : pcp-conf-6.3.7-8.el9_8.4.x86_64                        4/8 
+  Verifying        : pcp-libs-6.3.7-8.el9_8.4.x86_64                        5/8 
+  Verifying        : sysstat-12.5.4-11.el9.x86_64                           6/8 
+  Verifying        : zabbix-agent2-7.0.32-release2.el9.x86_64               7/8 
+  Verifying        : zabbix-get-7.0.32-release2.el9.x86_64                  8/8 
+
+Installed:
+  avahi-libs-0.8-23.el9.x86_64                                                  
+  libuv-1:1.42.0-2.el9_4.x86_64                                                 
+  lm_sensors-libs-3.6.0-10.el9.x86_64                                           
+  pcp-conf-6.3.7-8.el9_8.4.x86_64                                               
+  pcp-libs-6.3.7-8.el9_8.4.x86_64                                               
+  sysstat-12.5.4-11.el9.x86_64                                                  
+  zabbix-agent2-7.0.32-release2.el9.x86_64                                      
+  zabbix-get-7.0.32-release2.el9.x86_64                                         
+
+Complete!
+zabbix:x:993:992:Zabbix Monitoring System:/var/lib/zabbix:/sbin/nologin
+zabbix-agent2-7.0.32-release2.el9.x86_64
+zabbix-get-7.0.32-release2.el9.x86_64
+sysstat-12.5.4-11.el9.x86_64
+warning: /var/tmp/rpm-tmp.fagic6: Header V4 RSA/SHA512 Signature, key ID b5333005: NOKEY
+Importing GPG key 0xB5333005:
+ Userid     : "Zabbix LLC (Apr 2024) <packager@zabbix.com>"
+ Fingerprint: 4C3D 6F2C C75F 5146 754F C374 D913 219A B533 3005
+ From       : /etc/pki/rpm-gpg/RPM-GPG-KEY-ZABBIX-B5333005
+Created symlink /etc/systemd/system/multi-user.target.wants/zabbix-agent2.service → /usr/lib/systemd/system/zabbix-agent2.service.

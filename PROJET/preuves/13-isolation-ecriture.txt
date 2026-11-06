@@ -1,0 +1,24 @@
+$ set -e
+systemctl daemon-reload
+systemctl restart helios-suivi.service
+systemctl start helios-suivi-publish.service
+pid=$(systemctl show -p MainPID --value helios-suivi.service)
+set +e
+for path in /srv/helios/suivi/www/test-interdit /tmp/test-interdit /var/tmp/test-interdit /dev/shm/test-interdit; do
+ nsenter -t "$pid" -m -- runuser -u helios-suivi -- touch "$path"; echo "$path rc=$? (refus attendu)"
+done
+systemd-analyze security --no-pager helios-suivi.service | tail -3
+
+
+2026-11-06T10:37:11+01:00
+/srv/helios/suivi/www/test-interdit rc=1 (refus attendu)
+/tmp/test-interdit rc=1 (refus attendu)
+/var/tmp/test-interdit rc=1 (refus attendu)
+/dev/shm/test-interdit rc=1 (refus attendu)
+✗ UMask=                                                      Files created by service are group-writable by default                              0.1
+
+→ Overall exposure level for helios-suivi.service: 1.2 OK 🙂
+touch: cannot touch '/srv/helios/suivi/www/test-interdit': Read-only file system
+touch: cannot touch '/tmp/test-interdit': Read-only file system
+touch: cannot touch '/var/tmp/test-interdit': Read-only file system
+touch: cannot touch '/dev/shm/test-interdit': Read-only file system

@@ -1,0 +1,61 @@
+$ set -e
+systemctl daemon-reload
+systemctl start helios-suivi-backup.service
+cd /srv/helios/archives/suivi
+archive=$(ls -1 suivi-*.tar.gz | sort | tail -1)
+sha256sum -c "$archive.sha256"
+tar -tzf "$archive"
+start=$(date +%s)
+testdir=$(mktemp -d /root/restauration-suivi.XXXXXXXX)
+tar --acls --xattrs --selinux --numeric-owner -xzf "$archive" -C "$testdir"
+getfacl -cp /srv/helios/suivi/www > "$testdir/prod.acl"
+getfacl -cp "$testdir/srv/helios/suivi/www" > "$testdir/restaure.acl"
+diff -u "$testdir/prod.acl" "$testdir/restaure.acl"; echo "ACL www identiques rc=$?"
+getfacl -cp /srv/helios/suivi/www/index.html > "$testdir/index.acl"
+sha256sum /srv/helios/suivi/www/index.html > "$testdir/index.sha256"
+systemctl stop helios-suivi-publish.timer
+trap 'systemctl start helios-suivi-publish.timer' EXIT
+find /srv/helios/suivi/www -maxdepth 1 -type f ! -name index.html -exec sha256sum {} + > "$testdir/autres.sha256"
+rm /srv/helios/suivi/www/index.html
+curl -s -o /dev/null -w 'index absent HTTP=%{http_code}\n' http://127.0.0.1:8080/index.html
+tar --acls --xattrs --selinux --numeric-owner -xzf "$archive" -C / srv/helios/suivi/www/index.html
+getfacl -cp /srv/helios/suivi/www/index.html > "$testdir/index-restaure.acl"
+diff -u "$testdir/index.acl" "$testdir/index-restaure.acl"; echo "ACL index identiques rc=$?"
+sha256sum -c "$testdir/index.sha256" "$testdir/autres.sha256"
+ls -l /srv/helios/suivi/www/index.html
+curl -s -o /dev/null -w 'index restaure HTTP=%{http_code}\n' http://127.0.0.1:8080/index.html
+echo "Duree restauration et controles : $(( $(date +%s) - start )) secondes"
+systemctl start helios-suivi-publish.timer
+trap - EXIT
+
+
+2026-11-06T10:38:02+01:00
+suivi-20261106-103802.tar.gz: OK
+srv/helios/suivi/
+srv/helios/suivi/www/
+srv/helios/suivi/www/index.html
+srv/helios/suivi/www/etat.json
+srv/helios/suivi/www/preuve-acl.txt
+etc/sudoers.d/92-helios-suivi
+etc/zabbix/zabbix_agent2.d/helios-suivi.conf
+usr/local/sbin/helios-suivi-publish.sh
+usr/local/sbin/helios-suivi-backup.sh
+etc/systemd/system/helios-suivi.service
+etc/systemd/system/helios-suivi-publish.service
+etc/systemd/system/helios-suivi-publish.timer
+etc/systemd/system/helios-suivi-backup.service
+etc/systemd/system/helios-suivi-backup.timer
+usr/local/sbin/helios-suivi-audit.sh
+usr/local/sbin/helios-watch-auth.sh
+root/projet-baseline/
+root/projet-baseline/units.sha256
+root/projet-baseline/helios-watch-auth.sh.orig
+ACL www identiques rc=0
+index absent HTTP=404
+ACL index identiques rc=0
+/srv/helios/suivi/www/index.html: OK
+/srv/helios/suivi/www/etat.json: OK
+/srv/helios/suivi/www/preuve-acl.txt: OK
+-rw-rw----+ 1 lea suivi 203 Nov  6 10:31 /srv/helios/suivi/www/index.html
+index restaure HTTP=200
+Duree restauration et controles : 1 secondes

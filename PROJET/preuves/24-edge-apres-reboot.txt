@@ -1,0 +1,11 @@
+$ set +e
+curl --max-time 5 -s -o /dev/null -w '%{http_code}\n' http://10.42.0.10:8080/etat.json; echo "HTTP metier rc=$?"
+nc -zv -w2 192.168.56.10 8080; echo "administration filtree rc=$?"
+
+
+2026-11-06T10:47:45+01:00
+200
+HTTP metier rc=0
+administration filtree rc=1
+Ncat: Version 7.92 ( https://nmap.org/ncat )
+Ncat: No route to host.

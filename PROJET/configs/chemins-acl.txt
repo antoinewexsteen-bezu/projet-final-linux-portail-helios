@@ -1,0 +1,28 @@
+# file: /srv/helios/suivi
+# owner: root
+# group: suivi
+# flags: -s-
+user::rwx
+user:zabbix:--x
+group::r-x
+mask::r-x
+other::---
+
+# file: /var/lib/helios
+# owner: helios
+# group: helios
+user::rwx
+user:helios-suivi:--x
+group::---
+mask::--x
+other::---
+
+# file: /var/lib/helios/telemetry.csv
+# owner: helios
+# group: helios
+user::rw-
+user:helios-suivi:r--
+group::r--
+mask::r--
+other::r--
+

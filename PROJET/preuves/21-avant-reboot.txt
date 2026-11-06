@@ -1,0 +1,31 @@
+$ set -e
+rm -f /root/projet-baseline/checksum-test.save
+systemctl start helios-suivi-backup.service
+systemctl is-active helios-collect.service helios-watch-auth.timer helios-suivi.service helios-suivi-publish.timer helios-suivi-backup.timer zabbix-agent2 sysstat-collect.timer
+systemctl is-enabled helios-suivi.service helios-suivi-publish.timer helios-suivi-backup.timer zabbix-agent2 sysstat.service sysstat-collect.timer
+sha256sum -c /root/projet-baseline/units.sha256
+journalctl --flush
+systemctl reboot
+
+
+2026-11-06T10:43:10+01:00
+active
+active
+active
+active
+active
+active
+active
+enabled
+enabled
+enabled
+enabled
+enabled
+enabled
+/etc/systemd/system/helios-collect.service: OK
+/etc/systemd/system/helios-archive.service: OK
+/etc/systemd/system/helios-archive.timer: OK
+/etc/systemd/system/helios-inbox.path: OK
+/etc/systemd/system/helios.target: OK
+/etc/systemd/system/helios-watch-auth.service: OK
+/etc/systemd/system/helios-watch-auth.timer: OK

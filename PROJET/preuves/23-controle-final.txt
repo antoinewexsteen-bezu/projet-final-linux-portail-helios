@@ -1,0 +1,34 @@
+$ set -e
+/usr/local/sbin/helios-suivi-audit.sh; echo "audit rc=$?"
+systemctl start helios-suivi-backup.service
+cd /srv/helios/archives/suivi
+for sum in *.sha256; do sha256sum -c "$sum"; done
+visudo -c
+systemd-analyze verify /etc/systemd/system/helios-suivi*.service /etc/systemd/system/helios-suivi*.timer
+bash -n /usr/local/sbin/helios-suivi-publish.sh /usr/local/sbin/helios-suivi-backup.sh /usr/local/sbin/helios-suivi-audit.sh
+
+
+2026-11-06T10:46:52+01:00
+[OK] E1
+[OK] E2
+[OK] E3
+[OK] E4
+[OK] E5
+[OK] E6
+[OK] E7
+[OK] E8
+[OK] E9
+Bilan : 9/9
+audit rc=0
+suivi-20261106-103719.tar.gz: OK
+suivi-20261106-103720.tar.gz: OK
+suivi-20261106-103721.tar.gz: OK
+suivi-20261106-103802.tar.gz: OK
+suivi-20261106-104146.tar.gz: OK
+suivi-20261106-104310.tar.gz: OK
+suivi-20261106-104655.tar.gz: OK
+/etc/sudoers: parsed OK
+/etc/sudoers.d/90-cloud-init-users: parsed OK
+/etc/sudoers.d/90-helios-ops: parsed OK
+/etc/sudoers.d/91-nadia-edition: parsed OK
+/etc/sudoers.d/92-helios-suivi: parsed OK

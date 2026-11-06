@@ -1,0 +1,37 @@
+$ set -e
+for n in $(seq 1 8); do /usr/local/sbin/helios-suivi-backup.sh; sleep 1; done
+cd /srv/helios/archives/suivi
+ls -1 suivi-*.tar.gz
+echo "archives=$(find . -maxdepth 1 -name 'suivi-*.tar.gz' | wc -l) empreintes=$(find . -maxdepth 1 -name '*.sha256' | wc -l)"
+for sum in *.sha256; do sha256sum -c "$sum"; done
+systemctl cat helios-suivi-backup.timer
+
+
+2026-11-06T10:37:13+01:00
+suivi-20261106-103715.tar.gz
+suivi-20261106-103716.tar.gz
+suivi-20261106-103717.tar.gz
+suivi-20261106-103718.tar.gz
+suivi-20261106-103719.tar.gz
+suivi-20261106-103720.tar.gz
+suivi-20261106-103721.tar.gz
+archives=7 empreintes=7
+suivi-20261106-103715.tar.gz: OK
+suivi-20261106-103716.tar.gz: OK
+suivi-20261106-103717.tar.gz: OK
+suivi-20261106-103718.tar.gz: OK
+suivi-20261106-103719.tar.gz: OK
+suivi-20261106-103720.tar.gz: OK
+suivi-20261106-103721.tar.gz: OK
+# /etc/systemd/system/helios-suivi-backup.timer
+[Unit]
+Description=Sauvegarde quotidienne Helios a 03h15
+
+[Timer]
+OnCalendar=*-*-* 03:15:00
+Persistent=true
+AccuracySec=1s
+Unit=helios-suivi-backup.service
+
+[Install]
+WantedBy=timers.target

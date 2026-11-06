@@ -1,0 +1,201 @@
+$ set +e
+firewall-cmd --get-default-zone; firewall-cmd --get-active-zones
+for scope in '' '--permanent'; do
+ for zone in $(firewall-cmd $scope --get-zones); do
+  echo "=== $scope zone $zone ==="
+  firewall-cmd $scope --zone="$zone" --list-ports
+  firewall-cmd $scope --zone="$zone" --list-rich-rules
+ done
+done
+firewall-cmd --zone=internal --list-all
+nft list ruleset | grep 8080
+sshd -T | grep -E '^(port|permitrootlogin|passwordauthentication|allowgroups) '
+journalctl -u sshd --since '-5min' -g 'lea' --no-pager
+systemctl is-active helios-watch-auth.timer systemd-journald zabbix-agent2 sysstat-collect.timer
+journalctl --list-boots
+systemd-analyze cat-config systemd/journald.conf
+zabbix_get -s 127.0.0.1 -k helios.suivi.http
+zabbix_get -s 127.0.0.1 -k helios.suivi.age
+ps -o user,pid,comm -C zabbix_agent2
+getenforce; ausearch --input-logs -m AVC -ts recent
+
+
+2026-11-06T10:34:38+01:00
+drop
+drop
+  interfaces: enp0s3 enp0s10 enp0s9
+internal
+  interfaces: bond0 bond0.42
+work
+  interfaces: enp0s8
+  sources: 192.168.56.0/24
+===  zone block ===
+
+
+===  zone dmz ===
+
+
+===  zone drop ===
+
+
+===  zone external ===
+
+
+===  zone home ===
+
+
+===  zone internal ===
+2242/tcp 8080/tcp 10051/tcp
+rule priority="-100" source ipset="helios-blacklist" drop
+===  zone nm-shared ===
+
+rule priority="32767" reject
+===  zone public ===
+
+
+===  zone trusted ===
+
+
+===  zone work ===
+
+rule priority="-100" source ipset="helios-blacklist" drop
+rule port port="10051" protocol="tcp" reject
+rule port port="2242" protocol="tcp" log prefix="SSH-NEW " level="info" limit value="3/m" accept limit value="6/m"
+=== --permanent zone block ===
+
+
+=== --permanent zone dmz ===
+
+
+=== --permanent zone drop ===
+
+
+=== --permanent zone external ===
+
+
+=== --permanent zone home ===
+
+
+=== --permanent zone internal ===
+2242/tcp 8080/tcp 10051/tcp
+rule priority="-100" source ipset="helios-blacklist" drop
+=== --permanent zone nm-shared ===
+
+rule priority="32767" reject
+=== --permanent zone public ===
+
+
+=== --permanent zone trusted ===
+
+
+=== --permanent zone work ===
+
+rule port port="10051" protocol="tcp" reject
+rule priority="-100" source ipset="helios-blacklist" drop
+rule port port="2242" protocol="tcp" log prefix="SSH-NEW " level="info" limit value="3/m" accept limit value="6/m"
+internal (active)
+  target: default
+  icmp-block-inversion: no
+  interfaces: bond0 bond0.42
+  sources: 
+  services: 
+  ports: 10051/tcp 2242/tcp 8080/tcp
+  protocols: 
+  forward: yes
+  masquerade: no
+  forward-ports: 
+  source-ports: 
+  icmp-blocks: 
+  rich rules: 
+	rule priority="-100" source ipset="helios-blacklist" drop
+		tcp dport 8080 accept
+port 2242
+permitrootlogin no
+passwordauthentication no
+allowgroups ssh-admins
+Nov 06 10:34:38 srv-core sshd-session[3268]: User lea from 192.168.56.11 not allowed because none of user's groups are listed in AllowGroups
+Nov 06 10:34:38 srv-core sshd-session[3268]: Connection closed by invalid user lea 192.168.56.11 port 55826 [preauth]
+active
+active
+active
+active
+IDX BOOT ID                          FIRST ENTRY                 LAST ENTRY
+-10 e44683fdec4c4573b62598d85bbe5938 Mon 2026-11-02 15:19:48 CET Mon 2026-11-02 15:23:54 CET
+ -9 e099cf9bbce54900910fc93b924e55a1 Mon 2026-11-02 15:24:42 CET Mon 2026-11-02 15:27:56 CET
+ -8 fa506d47da5e4bb6bc739e6713cd550f Mon 2026-11-02 15:28:33 CET Mon 2026-11-02 15:31:55 CET
+ -7 162bd2feb4da4551910f3cfd943babc3 Mon 2026-11-02 15:47:11 CET Mon 2026-11-02 15:52:20 CET
+ -6 6a29ea9cd09843aa9ddfda245102fbce Mon 2026-11-02 15:54:35 CET Mon 2026-11-02 15:57:58 CET
+ -5 8f46235c3fa042c7a93b3bb6f040e69d Mon 2026-11-02 15:59:33 CET Mon 2026-11-02 16:35:02 CET
+ -4 6fcb5db0f6004f43933098eb205ca721 Tue 2026-11-03 15:14:02 CET Tue 2026-11-03 15:20:53 CET
+ -3 92b9e22f6559476887f27dc2d4c03c32 Tue 2026-11-03 15:34:45 CET Wed 2026-11-04 12:24:45 CET
+ -2 8d0d3e5fc1b94bda94b344669c13dff8 Wed 2026-11-04 12:29:37 CET Wed 2026-11-04 12:30:34 CET
+ -1 34404ddfb0bf47bf977990e58cd9d7ed Wed 2026-11-04 12:30:47 CET Thu 2026-11-05 16:56:49 CET
+  0 4a36bf97cfda41f48a064ce5ae058ccb Fri 2026-11-06 10:28:24 CET Fri 2026-11-06 10:34:58 CET
+# /etc/systemd/journald.conf
+#  This file is part of systemd.
+#
+#  systemd is free software; you can redistribute it and/or modify it under the
+#  terms of the GNU Lesser General Public License as published by the Free
+#  Software Foundation; either version 2.1 of the License, or (at your option)
+#  any later version.
+#
+# Entries in this file show the compile time defaults. Local configuration
+# should be created by either modifying this file, or by creating "drop-ins" in
+# the journald.conf.d/ subdirectory. The latter is generally recommended.
+# Defaults can be restored by simply deleting this file and all drop-ins.
+#
+# Use 'systemd-analyze cat-config systemd/journald.conf' to display the full config.
+#
+# See journald.conf(5) for details.
+
+[Journal]
+#Storage=auto
+#Compress=yes
+#Seal=yes
+#SplitMode=uid
+#SyncIntervalSec=5m
+#RateLimitIntervalSec=30s
+#RateLimitBurst=10000
+#SystemMaxUse=
+#SystemKeepFree=
+#SystemMaxFileSize=
+#SystemMaxFiles=100
+#RuntimeMaxUse=
+#RuntimeKeepFree=
+#RuntimeMaxFileSize=
+#RuntimeMaxFiles=100
+#MaxRetentionSec=
+#MaxFileSec=1month
+#ForwardToSyslog=no
+#ForwardToKMsg=no
+#ForwardToConsole=no
+#ForwardToWall=yes
+#TTYPath=/dev/console
+#MaxLevelStore=debug
+#MaxLevelSyslog=debug
+#MaxLevelKMsg=notice
+#MaxLevelConsole=info
+#MaxLevelWall=emerg
+#LineMax=48K
+#ReadKMsg=yes
+Audit=
+
+# /etc/systemd/journald.conf.d/50-helios.conf
+[Journal]
+Storage=persistent
+Compress=yes
+SystemMaxUse=500M
+SystemKeepFree=1G
+SystemMaxFileSize=50M
+MaxRetentionSec=1month
+MaxFileSec=1day
+RateLimitIntervalSec=30s
+RateLimitBurst=10000
+ForwardToSyslog=no
+Seal=yes
+200
+210
+USER         PID COMMAND
+zabbix      2239 zabbix_agent2
+Enforcing
+<no matches>

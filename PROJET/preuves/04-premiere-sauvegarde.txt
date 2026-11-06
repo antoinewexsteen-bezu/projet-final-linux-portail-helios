@@ -1,0 +1,21 @@
+$ systemctl start helios-suivi-backup.service; systemctl status --no-pager helios-suivi-backup.service; ls -l /srv/helios/archives/suivi; journalctl -t helios-suivi-backup -n 8 --no-pager
+
+2026-11-06T10:33:32+01:00
+○ helios-suivi-backup.service - Sauvegarde du portail Helios avec ACL
+     Loaded: loaded (/etc/systemd/system/helios-suivi-backup.service; static)
+     Active: inactive (dead) since Fri 2026-11-06 10:33:32 CET; 36ms ago
+TriggeredBy: ● helios-suivi-backup.timer
+    Process: 2730 ExecStart=/usr/local/sbin/helios-suivi-backup.sh (code=exited, status=0/SUCCESS)
+   Main PID: 2730 (code=exited, status=0/SUCCESS)
+        CPU: 120ms
+
+Nov 06 10:33:32 srv-core systemd[1]: Starting Sauvegarde du portail Helios avec ACL...
+Nov 06 10:33:32 srv-core helios-suivi-backup[2749]: sauvegarde terminee : suivi-20261106-103332.tar.gz ; retention 7
+Nov 06 10:33:32 srv-core systemd[1]: helios-suivi-backup.service: Deactivated successfully.
+Nov 06 10:33:32 srv-core systemd[1]: Finished Sauvegarde du portail Helios avec ACL.
+total 16
+-rw-------. 1 root root 8442 Nov  6 10:33 suivi-20261106-103332.tar.gz
+-rw-------. 1 root root   95 Nov  6 10:33 suivi-20261106-103332.tar.gz.sha256
+Nov 06 10:33:32 srv-core helios-suivi-backup[2749]: sauvegarde terminee : suivi-20261106-103332.tar.gz ; retention 7
+Warning: The unit file, source configuration file or drop-ins of helios-suivi-backup.service changed on disk. Run 'systemctl daemon-reload' to reload units.
+Warning: The unit file, source configuration file or drop-ins of helios-suivi-backup.service changed on disk. Run 'systemctl daemon-reload' to reload units.

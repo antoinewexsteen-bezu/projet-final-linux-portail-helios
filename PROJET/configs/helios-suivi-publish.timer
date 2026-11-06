@@ -1,0 +1,11 @@
+[Unit]
+Description=Publication Helios toutes les deux minutes
+
+[Timer]
+OnBootSec=30s
+OnUnitActiveSec=2min
+AccuracySec=1s
+Unit=helios-suivi-publish.service
+
+[Install]
+WantedBy=timers.target

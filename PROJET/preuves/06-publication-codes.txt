@@ -1,0 +1,25 @@
+$ set +e
+runuser -u helios-suivi -- /usr/local/sbin/helios-suivi-publish.sh; echo "succes rc=$?"
+flock -x /srv/helios/suivi/www -c 'runuser -u helios-suivi -- /usr/local/sbin/helios-suivi-publish.sh'; echo "verrou deja pris rc=$?"
+runuser -u nadia -- /usr/local/sbin/helios-suivi-publish.sh; echo "prerequis manquant rc=$?"
+python3 -m json.tool /srv/helios/suivi/www/etat.json
+journalctl -t helios-suivi-publish -n 12 --no-pager
+
+
+2026-11-06T10:34:28+01:00
+succes rc=3
+verrou deja pris rc=3
+prerequis manquant rc=3
+{
+    "genere": "2026-11-06T09:31:36.861802+00:00",
+    "hote": "srv-core",
+    "derniere_mesure": "2026-11-06T10:31:33+01:00",
+    "charge_1min": 0.68,
+    "mem_dispo_ko": 465516,
+    "mesures": 22
+}
+Nov 06 10:31:36 srv-core helios-suivi-publish[2227]: etat.json publie atomiquement
+Nov 06 10:33:37 srv-core helios-suivi-publish[2867]: prerequis manquant : telemetrie illisible ou www non inscriptible
+Nov 06 10:34:28 srv-core helios-suivi-publish[3116]: prerequis manquant : telemetrie illisible ou www non inscriptible
+Nov 06 10:34:28 srv-core helios-suivi-publish[3120]: prerequis manquant : telemetrie illisible ou www non inscriptible
+Nov 06 10:34:28 srv-core helios-suivi-publish[3123]: prerequis manquant : telemetrie illisible ou www non inscriptible

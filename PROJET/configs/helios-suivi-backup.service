@@ -1,0 +1,12 @@
+[Unit]
+Description=Sauvegarde du portail Helios avec ACL
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/helios-suivi-backup.sh
+UMask=0077
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=yes
+ReadWritePaths=/srv/helios/archives/suivi

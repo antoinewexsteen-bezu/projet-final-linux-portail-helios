@@ -1,0 +1,22 @@
+[Unit]
+Description=Publication atomique de la telemetrie Helios
+After=helios-collect.service
+
+[Service]
+Type=oneshot
+User=helios-suivi
+Group=suivi
+ExecStart=/usr/local/sbin/helios-suivi-publish.sh
+UMask=0007
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ReadOnlyPaths=/tmp /var/tmp /dev/shm
+ReadWritePaths=/srv/helios/suivi/www
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_UNIX

@@ -1,0 +1,88 @@
+$ set -e
+systemctl show -p CPUUsageNSec -p MemoryCurrent helios-suivi.service
+cg=$(systemctl show -p ControlGroup --value helios-suivi.service)
+echo 'cpu.stat AVANT'; cat "/sys/fs/cgroup$cg/cpu.stat"
+sar -u 1 > /tmp/helios-suivi-sar.txt &
+sar_pid=$!
+sleep 1
+start=$(date +%s.%N)
+for i in $(seq 2000); do curl -s -o /dev/null http://127.0.0.1:8080/etat.json; done
+end=$(date +%s.%N)
+sleep 1
+kill -INT "$sar_pid" || true
+wait "$sar_pid" || true
+echo "debut=$start fin=$end requetes=2000"
+cat /tmp/helios-suivi-sar.txt
+systemctl show -p CPUUsageNSec -p MemoryCurrent helios-suivi.service
+echo 'cpu.stat APRES'; cat "/sys/fs/cgroup$cg/cpu.stat"
+
+
+2026-11-06T10:37:23+01:00
+MemoryCurrent=10047488
+CPUUsageNSec=143758000
+cpu.stat AVANT
+usage_usec 143758
+user_usec 71460
+system_usec 72298
+nice_usec 0
+core_sched.force_idle_usec 0
+nr_periods 8
+nr_throttled 0
+throttled_usec 0
+nr_bursts 0
+burst_usec 0
+debut=1793957844.650186232 fin=1793957879.059343488 requetes=2000
+Linux 5.14.0-687.10.1.el9_8.0.1.x86_64 (srv-core) 	11/06/2026 	_x86_64_	(1 CPU)
+
+10:37:23 AM     CPU     %user     %nice   %system   %iowait    %steal     %idle
+10:37:24 AM     all      0.00      0.00      3.09      0.00      0.00     96.91
+10:37:25 AM     all     44.83      0.00     55.17      0.00      0.00      0.00
+10:37:26 AM     all     47.46      0.00     52.54      0.00      0.00      0.00
+10:37:27 AM     all     43.33      3.33     53.33      0.00      0.00      0.00
+10:37:28 AM     all     45.76      0.00     54.24      0.00      0.00      0.00
+10:37:29 AM     all     38.71      0.00     61.29      0.00      0.00      0.00
+10:37:30 AM     all     47.37      0.00     52.63      0.00      0.00      0.00
+10:37:31 AM     all     46.67      0.00     53.33      0.00      0.00      0.00
+10:37:32 AM     all     44.07      1.69     54.24      0.00      0.00      0.00
+10:37:33 AM     all     44.83      0.00     55.17      0.00      0.00      0.00
+10:37:34 AM     all     46.55      0.00     53.45      0.00      0.00      0.00
+10:37:35 AM     all     46.67      0.00     53.33      0.00      0.00      0.00
+10:37:36 AM     all     45.00      0.00     55.00      0.00      0.00      0.00
+10:37:37 AM     all     45.00      3.33     51.67      0.00      0.00      0.00
+10:37:38 AM     all     44.07      0.00     55.93      0.00      0.00      0.00
+10:37:39 AM     all     46.55      0.00     53.45      0.00      0.00      0.00
+10:37:40 AM     all     46.55      0.00     53.45      0.00      0.00      0.00
+10:37:41 AM     all     46.55      0.00     53.45      0.00      0.00      0.00
+10:37:42 AM     all     46.67      1.67     51.67      0.00      0.00      0.00
+10:37:43 AM     all     45.76      0.00     54.24      0.00      0.00      0.00
+10:37:44 AM     all     47.46      0.00     52.54      0.00      0.00      0.00
+10:37:45 AM     all     43.33      0.00     56.67      0.00      0.00      0.00
+10:37:46 AM     all     46.67      0.00     53.33      0.00      0.00      0.00
+10:37:47 AM     all     41.67      3.33     55.00      0.00      0.00      0.00
+10:37:48 AM     all     46.55      0.00     53.45      0.00      0.00      0.00
+10:37:49 AM     all     45.76      0.00     54.24      0.00      0.00      0.00
+10:37:50 AM     all     44.07      0.00     55.93      0.00      0.00      0.00
+10:37:51 AM     all     48.28      0.00     51.72      0.00      0.00      0.00
+10:37:52 AM     all     44.07      3.39     52.54      0.00      0.00      0.00
+10:37:53 AM     all     48.28      0.00     51.72      0.00      0.00      0.00
+10:37:54 AM     all     46.55      0.00     53.45      0.00      0.00      0.00
+10:37:55 AM     all     43.33      0.00     56.67      0.00      0.00      0.00
+10:37:56 AM     all     45.76      0.00     54.24      0.00      0.00      0.00
+10:37:57 AM     all     45.76      1.69     52.54      0.00      0.00      0.00
+10:37:58 AM     all     46.55      0.00     53.45      0.00      0.00      0.00
+10:37:59 AM     all     32.88      0.00     32.88      0.00      0.00     34.25
+
+Average:        all     43.01      0.51     51.01      0.00      0.00      5.47
+MemoryCurrent=10178560
+CPUUsageNSec=1922386000
+cpu.stat APRES
+usage_usec 1922386
+user_usec 1038453
+system_usec 883932
+nice_usec 0
+core_sched.force_idle_usec 0
+nr_periods 355
+nr_throttled 0
+throttled_usec 0
+nr_bursts 0
+burst_usec 0

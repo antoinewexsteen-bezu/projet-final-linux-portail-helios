@@ -1,0 +1,39 @@
+$ systemctl is-active helios-collect.service helios-watch-auth.timer; systemctl cat helios.target
+firewall-cmd --get-default-zone; firewall-cmd --get-active-zones
+sshd -T | grep -E '^(port|permitrootlogin|passwordauthentication|allowgroups) '
+tail -3 /var/lib/helios/telemetry.csv; sleep 6; tail -2 /var/lib/helios/telemetry.csv
+getenforce
+mkdir -p /root/projet-baseline
+find /etc/systemd/system -maxdepth 2 -type f -name 'helios*' -exec sha256sum {} + > /root/projet-baseline/units.sha256
+
+
+2026-11-06T10:30:35+01:00
+active
+active
+# /etc/systemd/system/helios.target
+[Unit]
+Description=Pile applicative Helios
+Requires=multi-user.target
+After=multi-user.target
+AllowIsolate=no
+
+[Install]
+WantedBy=multi-user.target
+drop
+drop
+  interfaces: enp0s3 enp0s10 enp0s9
+internal
+  interfaces: bond0 bond0.42
+work
+  interfaces: enp0s8
+  sources: 192.168.56.0/24
+port 2242
+permitrootlogin no
+passwordauthentication no
+allowgroups ssh-admins
+2026-11-06T10:30:22+01:00,1.04,491720
+2026-11-06T10:30:27+01:00,0.96,498428
+2026-11-06T10:30:32+01:00,0.88,501592
+2026-11-06T10:30:32+01:00,0.88,501592
+2026-11-06T10:30:37+01:00,0.81,495768
+Enforcing

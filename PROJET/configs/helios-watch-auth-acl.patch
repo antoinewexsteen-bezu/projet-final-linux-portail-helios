@@ -1,0 +1,11 @@
+--- /usr/local/sbin/helios-watch-auth.sh.orig
++++ /usr/local/sbin/helios-watch-auth.sh
+@@ -2,7 +2,7 @@
+ # Root uniquement. Fenetre glissante de 10 minutes, seuil strictement > 5.
+ set -Eeuo pipefail
+ umask 077
+-install -d -m 0700 /var/lib/helios
++[[ -d /var/lib/helios ]] || install -d -m 0700 /var/lib/helios
+ exec 9>/run/helios-watch-auth.lock
+ flock -n 9 || exit 2
+ trap 'rc=$?; logger -t helios-watch-auth "ERROR rc=$rc ligne=$LINENO"; exit "$rc"' ERR

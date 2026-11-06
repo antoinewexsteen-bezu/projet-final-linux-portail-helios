@@ -1,0 +1,79 @@
+$ set -e
+date -Is; uptime
+systemctl is-active helios-collect.service helios-watch-auth.timer helios-suivi.service helios-suivi-publish.timer helios-suivi-backup.timer zabbix-agent2 sysstat.service sysstat-collect.timer sysstat-summary.timer
+systemctl list-timers 'helios-suivi*' sysstat-collect.timer --no-pager
+systemctl start helios-watch-auth.service
+runuser -u helios-suivi -- test -r /var/lib/helios/telemetry.csv; echo 'ACL source apres reboot et watcher : OK'
+getfacl /var/lib/helios
+curl -s -o /dev/null -w 'index HTTP=%{http_code}\n' http://127.0.0.1:8080/
+curl -s http://127.0.0.1:8080/etat.json | python3 -m json.tool
+zabbix_get -s 127.0.0.1 -k helios.suivi.http
+zabbix_get -s 127.0.0.1 -k helios.suivi.age
+firewall-cmd --get-default-zone
+firewall-cmd --zone=internal --query-port=8080/tcp
+sshd -T | grep -E '^(port|permitrootlogin|passwordauthentication|allowgroups) '
+getenforce
+sha256sum -c /root/projet-baseline/units.sha256
+journalctl --list-boots | tail -3
+ausearch --input-logs -m AVC -ts boot || true
+
+
+2026-11-06T10:46:43+01:00
+2026-11-06T10:46:43+01:00
+ 10:46:43 up 0 min,  0 users,  load average: 1.32, 0.38, 0.13
+active
+active
+active
+active
+active
+active
+active
+active
+active
+NEXT                        LEFT          LAST                        PASSED       UNIT                       ACTIVATES
+Fri 2026-11-06 10:48:34 CET 1min 50s left Fri 2026-11-06 10:44:21 CET 2min 21s ago helios-suivi-publish.timer helios-suivi-publish.service
+Fri 2026-11-06 10:50:00 CET 3min 16s left -                           -            sysstat-collect.timer      sysstat-collect.service
+Sat 2026-11-07 03:15:00 CET 16h left      Fri 2026-11-06 10:31:36 CET 15min ago    helios-suivi-backup.timer  helios-suivi-backup.service
+
+3 timers listed.
+Pass --all to see loaded but inactive timers, too.
+ACL source apres reboot et watcher : OK
+# file: var/lib/helios
+# owner: helios
+# group: helios
+user::rwx
+user:helios-suivi:--x
+group::---
+mask::--x
+other::---
+
+index HTTP=200
+{
+    "genere": "2026-11-06T09:44:36.884567+00:00",
+    "hote": "srv-core",
+    "derniere_mesure": "2026-11-06T10:44:36+01:00",
+    "charge_1min": 1.43,
+    "mem_dispo_ko": 452900,
+    "mesures": 159
+}
+200
+126
+drop
+yes
+port 2242
+permitrootlogin no
+passwordauthentication no
+allowgroups ssh-admins
+Enforcing
+/etc/systemd/system/helios-collect.service: OK
+/etc/systemd/system/helios-archive.service: OK
+/etc/systemd/system/helios-archive.timer: OK
+/etc/systemd/system/helios-inbox.path: OK
+/etc/systemd/system/helios.target: OK
+/etc/systemd/system/helios-watch-auth.service: OK
+/etc/systemd/system/helios-watch-auth.timer: OK
+ -2 34404ddfb0bf47bf977990e58cd9d7ed Wed 2026-11-04 12:30:47 CET Thu 2026-11-05 16:56:49 CET
+ -1 4a36bf97cfda41f48a064ce5ae058ccb Fri 2026-11-06 10:28:24 CET Fri 2026-11-06 10:43:34 CET
+  0 f80f0e6950fc450f80dd0e1bf8854b8a Fri 2026-11-06 10:43:54 CET Fri 2026-11-06 10:46:44 CET
+getfacl: Removing leading '/' from absolute path names
+<no matches>
